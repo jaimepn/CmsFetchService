@@ -1,4 +1,4 @@
-using CmsFetchService.Models;
+using CmsFetchService.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CmsFetchService.API.Controllers

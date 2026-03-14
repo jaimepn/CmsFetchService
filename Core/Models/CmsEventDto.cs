@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace CmsFetchService.Models
+namespace CmsFetchService.Core.Models
 {
     public class CmsEventDto
     {

@@ -1,4 +1,4 @@
-﻿namespace CmsFetchService.Models
+﻿namespace CmsFetchService.Core.Models
 {
     public enum CmsEventType
     {
