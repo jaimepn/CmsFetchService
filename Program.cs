@@ -1,4 +1,6 @@
+using CmsFetchService.Core.Application;
 using CmsFetchService.Infrastructure.Persistence;
+using CmsFetchService.Infrastructure.Queue;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -13,6 +15,9 @@ builder.Services.AddControllers();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddSingleton<ICmsQueue, CmsQueue>();
+builder.Services.AddHostedService<CmsEventProcessor>();
 
 var app = builder.Build();
 
