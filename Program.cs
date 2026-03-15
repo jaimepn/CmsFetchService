@@ -1,5 +1,6 @@
 using CmsFetchService.Core.Application;
 using CmsFetchService.Infrastructure.Persistence;
+using CmsFetchService.Infrastructure.Persistence.Repository;
 using CmsFetchService.Infrastructure.Queue;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -18,6 +19,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddSingleton<ICmsQueue, CmsQueue>();
 builder.Services.AddHostedService<CmsEventProcessor>();
+builder.Services.AddScoped<ICmsRepository, CmsRepository>();
 
 var app = builder.Build();
 

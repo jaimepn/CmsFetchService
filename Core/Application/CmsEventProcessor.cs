@@ -1,6 +1,6 @@
 ﻿using CmsFetchService.Core.Extensions;
 using CmsFetchService.Core.Models;
-using CmsFetchService.Infrastructure.Persistence;
+using CmsFetchService.Infrastructure.Persistence.Repository;
 using CmsFetchService.Infrastructure.Queue;
 
 
@@ -16,14 +16,14 @@ namespace CmsFetchService.Core.Application
         {
             _logger.LogInformation("CmsEventProcessor starting...");
 
-            using var scope = _scopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
             await foreach (var cmsEvent in _queue.DequeueAllAsync(stoppingToken))
             {
                 try
                 {
-                    await ProcessEventAsync(db, cmsEvent);
+                    using var scope = _scopeFactory.CreateScope();
+                    var repo = scope.ServiceProvider.GetRequiredService<ICmsRepository>();
+
+                    await ProcessEventAsync(repo, cmsEvent);
                 }
                 catch (Exception ex)
                 {
@@ -32,9 +32,9 @@ namespace CmsFetchService.Core.Application
             }
         }
 
-        private async Task ProcessEventAsync(AppDbContext db, CmsEventDto cmsEvent)
+        private async Task ProcessEventAsync(ICmsRepository repo, CmsEventDto cmsEvent)
         {
-            var existing = await db.CmsRecordEntries.FindAsync(cmsEvent.Id);
+            var existing = await repo.GetByIdAsync(cmsEvent.Id);
 
             if (existing != null && cmsEvent.Version <= existing.Version)
             {
@@ -46,7 +46,7 @@ namespace CmsFetchService.Core.Application
             {
                 _logger.LogInformation("Adding new Cms Record with id: {Id}", cmsEvent.Id);
                 var recordEntity = cmsEvent.ToEntity();
-                db.CmsRecordEntries.Add(recordEntity);
+                await repo.UpsertAsync(recordEntity);
             }
             else 
             {
@@ -55,9 +55,10 @@ namespace CmsFetchService.Core.Application
                 existing.Version = cmsEvent.Version;
                 existing.LastUpdated = cmsEvent.Timestamp;
                 existing.IsPublished = (cmsEvent.Type == CmsEventType.Publish);
+                await repo.UpsertAsync(existing);
             }
 
-            await db.SaveChangesAsync();
+            await repo.SaveChangesAsync();
         }
 
     }
