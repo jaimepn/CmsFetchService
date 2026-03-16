@@ -1,5 +1,6 @@
 using CmsFetchService.Core.Models;
 using CmsFetchService.Infrastructure.Queue;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CmsFetchService.API.Controllers
@@ -8,7 +9,8 @@ namespace CmsFetchService.API.Controllers
     [Route("cms")]
     public class WebHookController(ICmsQueue _queue) : ControllerBase
     {
-
+        [Authorize(Roles = "CmsClient")]
+        [EndpointSummary("Webhook Events Receiver")]
         [HttpPost(Name = "events")]
         public async Task<IActionResult> ReceiveEventsAsync([FromBody] List<CmsEventDto> events)
         {

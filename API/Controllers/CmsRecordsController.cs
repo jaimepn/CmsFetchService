@@ -1,4 +1,5 @@
 ﻿using CmsFetchService.Infrastructure.Persistence.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CmsFetchService.API.Controllers
@@ -8,7 +9,8 @@ namespace CmsFetchService.API.Controllers
     [Route("api/cmsrecords")]
     public class CmsRecordsController(ICmsRepository repository) : ControllerBase
     {
-
+        [EndpointSummary("Admin: View All Records")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("records")]
         public async Task<IActionResult> GetAll()
         {
@@ -16,6 +18,8 @@ namespace CmsFetchService.API.Controllers
             return Ok(records);
         }
 
+        [EndpointSummary("View Published Records")]
+        [Authorize(Roles = "User")]
         [HttpGet("content")]
         public async Task<IActionResult> GetPublished()
         {
@@ -23,6 +27,8 @@ namespace CmsFetchService.API.Controllers
             return Ok(records);
         }
 
+        [EndpointSummary("Admin: Manual Disable")]
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/disable")]
         public async Task<IActionResult> ManualDisable(string id)
         {
