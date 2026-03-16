@@ -36,7 +36,7 @@ namespace CmsFetchService.Core.Application
         {
             var existing = await repo.GetByIdAsync(cmsEvent.Id);
 
-            if (existing != null && cmsEvent.Version <= existing.Version)
+            if (existing != null && cmsEvent.Version < existing.Version)
             {
                 _logger.LogWarning("Ignoring incoming CmsEvent as it is an older version: {EventObj}", cmsEvent);
                 return;

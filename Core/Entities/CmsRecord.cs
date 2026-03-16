@@ -12,8 +12,6 @@ namespace CmsFetchService.Core.Entities
         public string? Payload { get; set; }
         public int Version { get; set; }
 
-
-        public CmsEventType Type { get; set; }
         public bool IsPublished { get; set; }
         public bool IsManuallyDisabled { get; set; } = false;
         public DateTimeOffset LastUpdated { get; set; }

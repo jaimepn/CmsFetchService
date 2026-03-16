@@ -12,8 +12,7 @@ namespace CmsFetchService.Core.Extensions
                 Id = dto.Id,
                 Payload = dto.Payload,
                 Version = dto.Version,
-                Type = dto.Type,
-                IsPublished = false,
+                IsPublished = (dto.Type == CmsEventType.Publish),
                 LastUpdated = dto.Timestamp
             };
         }

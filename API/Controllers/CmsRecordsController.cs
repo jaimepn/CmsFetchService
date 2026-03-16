@@ -9,14 +9,14 @@ namespace CmsFetchService.API.Controllers
     public class CmsRecordsController(ICmsRepository repository) : ControllerBase
     {
 
-        [HttpGet]
+        [HttpGet("records")]
         public async Task<IActionResult> GetAll()
         {
             var records = await repository.GetAllAsync();
             return Ok(records);
         }
 
-        [HttpGet]
+        [HttpGet("content")]
         public async Task<IActionResult> GetPublished()
         {
             var records = await repository.GetPublishedAsync();
