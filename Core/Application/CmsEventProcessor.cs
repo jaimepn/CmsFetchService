@@ -22,7 +22,6 @@ namespace CmsFetchService.Core.Application
                 {
                     using var scope = _scopeFactory.CreateScope();
                     var repo = scope.ServiceProvider.GetRequiredService<ICmsRepository>();
-
                     await ProcessEventAsync(repo, cmsEvent);
                 }
                 catch (Exception ex)
@@ -36,28 +35,30 @@ namespace CmsFetchService.Core.Application
         {
             var existing = await repo.GetByIdAsync(cmsEvent.Id);
 
-            if (existing != null && cmsEvent.Version < existing.Version)
+            if (cmsEvent.Type == CmsEventType.Delete)
             {
-                _logger.LogWarning("Ignoring incoming CmsEvent as it is an older version: {EventObj}", cmsEvent);
+                _logger.LogInformation("Deleting Cms Record with id: {Id}", cmsEvent.Id);
+                await repo.DeleteAsync(cmsEvent.Id);
+                await repo.SaveChangesAsync();
                 return;
-            }
-
-            if (existing == null)
-            {
-                _logger.LogInformation("Adding new Cms Record with id: {Id}", cmsEvent.Id);
-                var recordEntity = cmsEvent.ToEntity();
-                await repo.UpsertAsync(recordEntity);
             }
             else 
             {
-                _logger.LogInformation("Updating existing Cms Record with id: {Id}", cmsEvent.Id);
-                existing.Payload = cmsEvent.Payload;
-                existing.Version = cmsEvent.Version;
-                existing.LastUpdated = cmsEvent.Timestamp;
-                existing.IsPublished = (cmsEvent.Type == CmsEventType.Publish);
-                await repo.UpsertAsync(existing);
+                var recordEntity = cmsEvent.ToEntity();
+                if (cmsEvent.Type == CmsEventType.Publish)
+                {
+                    recordEntity.IsPublished = true;
+                }
+                else if (cmsEvent.Type == CmsEventType.UnPublish)
+                {
+                    recordEntity.IsPublished = false;
+                }
+                else if (existing != null)
+                {
+                    recordEntity.IsPublished = existing.IsPublished;
+                }
+                 await repo.UpsertAsync(recordEntity);
             }
-
             await repo.SaveChangesAsync();
         }
 

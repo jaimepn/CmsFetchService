@@ -9,5 +9,6 @@ namespace CmsFetchService.Infrastructure.Persistence.Repository
         Task<List<CmsRecord>> GetPublishedAsync();
         Task UpsertAsync(CmsRecord record);
         Task SaveChangesAsync();
+        Task DeleteAsync(string id);
     }
 }

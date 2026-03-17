@@ -17,6 +17,11 @@ var builder = WebApplication.CreateBuilder(args);
 var dbPath = Path.Join(AppContext.BaseDirectory, "cms.db");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
+builder.Services.AddDbContext<ReadOnlyDbContext>(options =>
+{
+    options.UseSqlite($"Data Source={dbPath}")
+           .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+});
 
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(options => { 
@@ -90,10 +95,13 @@ builder.Services.AddScoped<ICmsRepository, CmsRepository>();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing")) 
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
+    }
 }
 
 // Configure the HTTP request pipeline.
@@ -109,3 +117,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }
