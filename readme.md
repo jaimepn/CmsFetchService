@@ -13,7 +13,7 @@ A synchronization service that receives CMS events via a webhook and exposes pro
 ### Installation & Run
 * git clone [https://github.com/jaimepn/CmsFetchService.git](https://github.com/jaimepn/CmsFetchService.git)
 * dotnet run --project CmsFetchService.API
-** following this, API documentation will be available on: http://localhost:5281/scalar/v1 (with sample credentials and request objects)
+* (following this, API documentation will be available on: http://localhost:5281/scalar/v1 - with sample credentials and request objects)
 
 ### Known limitations
 * Credentials are hardcoded, for demonstration only
