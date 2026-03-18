@@ -35,6 +35,13 @@ namespace CmsFetchService.Core.Application
         {
             var existing = await repo.GetByIdAsync(cmsEvent.Id);
 
+            if (existing != null && cmsEvent.Version <= existing.Version)
+            {
+                _logger.LogWarning("Ignoring previous version for event {EventId} - Current version {CurrentV}, Incoming: {IncomingV}",
+                    cmsEvent.Id, existing.Version, cmsEvent.Version);
+                return;
+            }
+
             if (cmsEvent.Type == CmsEventType.Delete)
             {
                 _logger.LogInformation("Deleting Cms Record with id: {Id}", cmsEvent.Id);
@@ -57,7 +64,11 @@ namespace CmsFetchService.Core.Application
                 {
                     recordEntity.IsPublished = existing.IsPublished;
                 }
-                 await repo.UpsertAsync(recordEntity);
+                else 
+                {
+                    recordEntity.IsPublished = false;
+                }
+                await repo.UpsertAsync(recordEntity);
             }
             await repo.SaveChangesAsync();
         }

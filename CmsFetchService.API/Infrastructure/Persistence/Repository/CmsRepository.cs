@@ -8,7 +8,7 @@ namespace CmsFetchService.Infrastructure.Persistence.Repository
     {
 
         public async Task<CmsRecord?> GetByIdAsync(string id) =>
-            await _readContext.CmsRecordEntries.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            await _readContext.CmsRecordEntries.FirstOrDefaultAsync(x => x.Id == id);
 
         public async Task<List<CmsRecord>> GetAllAsync() =>
             await _readContext.CmsRecordEntries.ToListAsync();
@@ -18,24 +18,19 @@ namespace CmsFetchService.Infrastructure.Persistence.Repository
 
         public async Task UpsertAsync(CmsRecord record)
         {
-            var existing = await _writeContext.CmsRecordEntries.FirstOrDefaultAsync(x => x.Id == record.Id);
+            var tracked = _writeContext.CmsRecordEntries.Local.FirstOrDefault(x => x.Id == record.Id);
+            var existing = tracked ?? await _writeContext.CmsRecordEntries.FirstOrDefaultAsync(x => x.Id == record.Id);
+
             if (existing == null)
             {
                 _writeContext.CmsRecordEntries.Add(record);
             }
             else
             {
-                if (record.Version >= existing.Version)
-                {
-                    _writeContext.Entry(existing).CurrentValues.SetValues(record);
-                }
-                else
-                {
-                    _logger.LogWarning("Ignoring previous version for event {EventId} - Current version {CurrentV}, Incoming: {IncomingV}",
-                        record.Id, existing.Version, record.Version);
-                }
+                _writeContext.Entry(existing).CurrentValues.SetValues(record);
             }
         }
+
         public async Task DeleteAsync(string id)
         {
             var entity = await _writeContext.CmsRecordEntries.FindAsync(id);

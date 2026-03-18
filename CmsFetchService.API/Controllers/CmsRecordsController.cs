@@ -7,6 +7,7 @@ namespace CmsFetchService.API.Controllers
 
     [ApiController]
     [Route("api/cmsrecords")]
+    [Tags("Record API")]
     public class CmsRecordsController(ICmsRepository repository) : ControllerBase
     {
         [EndpointSummary("Admin: View All Records")]
@@ -37,8 +38,24 @@ namespace CmsFetchService.API.Controllers
 
             record.IsManuallyDisabled = true;
 
+            await repository.UpsertAsync(record);
             await repository.SaveChangesAsync();
             return Ok(record);
+        }
+
+        [EndpointSummary("Admin: Delete")]
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRecord(string id)
+        {
+            var existing = await repository.GetByIdAsync(id);
+            if (existing == null)
+            {
+                return NotFound();
+            }
+            await repository.DeleteAsync(id);
+            await repository.SaveChangesAsync();
+            return NoContent();
         }
 
     }
